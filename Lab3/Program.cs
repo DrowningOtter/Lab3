@@ -31,9 +31,10 @@ namespace Lab3
         {
             //TestSavingToFile();
             //TestMainCollection();
-            V2DataArray tmp_arr = new V2DataArray("key", DateTime.Today);
-            SplineData tmp = new SplineData(tmp_arr, 10, 100);
-            tmp.CalcSpline();
+            //V2DataArray tmp_arr = new V2DataArray("key", DateTime.Today);
+            //SplineData tmp = new SplineData(tmp_arr, 10, 100);
+            //tmp.CalcSpline();
+            SplineData.CalcSpline();
         }
         private static void TestSavingToFile()
         {

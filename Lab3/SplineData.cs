@@ -26,9 +26,25 @@ namespace Lab3
             this.m = m;
             this.MaxIterations = MaxIterations;
         }
-        public void CalcSpline()
+        public static void Func(double x, ref double y1, ref double y2)
         {
-            spline();
+            y1 = 2 * x;
+            y2 = 3 * x;
+        }
+        public static void CalcSpline()
+        {
+            Random random = new Random();
+            int len = 5;
+            double[] x = new double[len];
+            for (int i = 0; i < x.Length; i++) { x[i] = (int)(random.NextDouble() * 10); }
+            Array.Sort(x);
+            Console.WriteLine("input values:");
+            for (int i = 0; i < x.Length; ++i) Console.Write(x[i] + " ");
+            Console.WriteLine();
+            V2DataArray arr = new V2DataArray("key", DateTime.Today, x, Func);
+            double[] splineValues = new double[len * 2];
+            spline(len, arr.Net, arr[0].Length, arr[0], 3, splineValues);
+            foreach (double item in  splineValues) { Console.Write(item + " "); }
         }
         public string ToLongString(string format)
         {
@@ -63,7 +79,7 @@ namespace Lab3
         }
 
         [DllImport("C:\\Users\\Artem\\source\\repos\\Lab3\\Build\\x64\\Debug\\dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void spline();
+        public static extern void spline(int nX, double[] X, int nY, double[] Y, int m, double[] splineValues);
 
     }
 }
