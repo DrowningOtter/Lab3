@@ -37,12 +37,12 @@ namespace Lab3
             x = x.Distinct().ToArray();
 
             V2DataArray arr = new V2DataArray("key", DateTime.Today, x, func1);
-            
+            int number_of_dots_in_uniform_grid = 4;
             for (int i = 0; i < approximation_funcs.Length; ++i)
             {
                 Console.WriteLine($"testing initial approximation function with number {i}");
                 Func<double, double> func = approximation_funcs[i];
-                SplineData data = new SplineData(arr, 4, 1000);
+                SplineData data = new SplineData(arr, number_of_dots_in_uniform_grid, 1000);
                 SplineData.CalcSpline(data, func);
                 Console.WriteLine(data.ToLongString("f3"));
                 data.Save($"C:\\Users\\Artem\\source\\repos\\Lab3\\saving{i}.txt", "f3");
