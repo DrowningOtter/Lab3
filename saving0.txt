@@ -1,0 +1,17 @@
+Initial grid:
+V2DataArray key 09.12.2023 0:00:00
+0,000 0,000 0,000
+2,000 4,000 4,000
+4,000 16,000 8,000
+9,000 81,000 18,000
+
+Spline approximation results:
+0,000, 0,000, -0,000
+2,000, 4,000, 4,000
+4,000, 16,000, 16,000
+9,000, 81,000, 81,000
+
+Minimal residual value: 7,276265996749453E-07
+Stop reason: specified residual norm has been reached
+Actual number of iterations: 42
+

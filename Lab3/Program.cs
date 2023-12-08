@@ -22,6 +22,10 @@ namespace Lab3
             if (x > 10) return new DataItem(x, 0, 0);
             return new DataItem(x, x * 13, x * x * x);
         }
+        static Func<double, double>[] approximation_funcs = {
+            new Func<double, double>(x => 3 * x * x * x),
+            new Func<double, double>(x => 2.5 * x + 5),
+        };
         private static void Main()
         {
             Random rn = new Random();
@@ -33,10 +37,16 @@ namespace Lab3
             x = x.Distinct().ToArray();
 
             V2DataArray arr = new V2DataArray("key", DateTime.Today, x, func1);
-            SplineData data = new SplineData(arr, 4, 1000);
-            SplineData.CalcSpline(data);
-            Console.WriteLine(data.ToLongString("f3"));
-            data.Save("C:\\Users\\Artem\\source\\repos\\Lab3\\saving.txt", "f3");
+            
+            for (int i = 0; i < approximation_funcs.Length; ++i)
+            {
+                Console.WriteLine($"testing initial approximation function with number {i}");
+                Func<double, double> func = approximation_funcs[i];
+                SplineData data = new SplineData(arr, 4, 1000);
+                SplineData.CalcSpline(data, func);
+                Console.WriteLine(data.ToLongString("f3"));
+                data.Save($"C:\\Users\\Artem\\source\\repos\\Lab3\\saving{i}.txt", "f3");
+            }
         }
         private static void TestSavingToFile()
         {

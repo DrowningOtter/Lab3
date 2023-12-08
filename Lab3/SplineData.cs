@@ -33,11 +33,7 @@ namespace Lab3
             y1 = 5.5 * x * x;
             y2 = 3 * x;
         }
-        public static double initial_approximation_func(double x)
-        {
-            return x * x;
-        }
-        public static void CalcSpline(SplineData data)
+        public static void CalcSpline(SplineData data, Func<double, double> initial_approximation_func)
         {
             int StopReasonLocal = 0;
             double[] values_on_uniform_grid = linspace(data.Values[0][0], 
@@ -64,7 +60,7 @@ namespace Lab3
                 // Подсчет нормы невязки
                 data.MinResidual += (data.SplinePredNonUniform[i] - data.Values[0][i]) * (data.SplinePredNonUniform[i] - data.Values[0][i]);
                 // Заполнение листа результатов сплайн-аппроксимации
-                data.SplinePred.Append(new SplineDataItem(data.Values.Net[i], data.Values[0][i], data.SplinePredNonUniform[i]));
+                data.SplinePred = data.SplinePred.Append(new SplineDataItem(data.Values.Net[i], data.Values[0][i], data.SplinePredNonUniform[i])).ToList();
             }
             data.MinResidual = Math.Sqrt(data.MinResidual);
             data.StopReason = StopReasonLocal;
@@ -73,16 +69,20 @@ namespace Lab3
         public string ToLongString(string format)
         {
             var output = new StringBuilder();
-            output.Append("Initial grid: ");
+            output.Append("Initial grid:\n");
             output.Append(Values.ToLongString(format) + "\n");
-            foreach (var item in SplinePred)
-            {
-                output.Append(item.ToString() + "\n");
-            }
+            output.Append("Spline approximation results:\n");
+            foreach (var item in this.SplinePred) output.AppendLine(item.ToString(format));
             output.AppendLine();
             output.Append("Minimal residual value: " + MinResidual.ToString() + "\n");
-            output.Append("Stop reason: " + StopReason.ToString() + "\n");
-            output.Append("Actual number of iterations: " + ActualNumberOfIterations);
+            output.Append("Stop reason: ");
+            if (this.StopReason == 1) output.Append("specified number of iterations has been exceeded\n");
+            else if (this.StopReason == 2) output.Append("specified trust region size has been reached\n");
+            else if (this.StopReason == 3) output.Append("specified residual norm has been reached\n");
+            else if (this.StopReason == 4) output.Append("the specified row norm of the Jacobian matrix has been reached\n");
+            else if (this.StopReason == 5) output.Append("specified trial step size has been reached\n");
+            else if (this.StopReason == 6) output.Append("the specified difference between the norm of the function and the error has been reached\n");
+            output.Append("Actual number of iterations: " + ActualNumberOfIterations + "\n");
             return output.ToString();
         }
         public bool Save(string filename, string format)
