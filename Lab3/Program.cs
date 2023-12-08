@@ -15,11 +15,6 @@ namespace Lab3
         {
             y1 = x * x;
             y2 = x * 2;
-            if (x > 10)
-            {
-                y1 = 0;
-                y2 = 0;
-            }
         }
         public static DataItem func2(double x) => new DataItem(x, x * x, x * 2);
         public static DataItem func3(double x)
@@ -29,12 +24,19 @@ namespace Lab3
         }
         private static void Main()
         {
-            //TestSavingToFile();
-            //TestMainCollection();
-            //V2DataArray tmp_arr = new V2DataArray("key", DateTime.Today);
-            //SplineData tmp = new SplineData(tmp_arr, 10, 100);
-            //tmp.CalcSpline();
-            SplineData.CalcSpline();
+            Random rn = new Random();
+            int minValue = 0;
+            int maxValue = 10;
+            int len = 4;
+            double[] x = Enumerable.Range(minValue, maxValue - minValue + 1).Select(x => (double)x).OrderBy(_ => rn.Next()).Take(len).ToArray();
+            Array.Sort(x);
+            x = x.Distinct().ToArray();
+
+            V2DataArray arr = new V2DataArray("key", DateTime.Today, x, func1);
+            SplineData data = new SplineData(arr, 4, 1000);
+            SplineData.CalcSpline(data);
+            Console.WriteLine(data.ToLongString("f3"));
+            data.Save("C:\\Users\\Artem\\source\\repos\\Lab3\\saving.txt", "f3");
         }
         private static void TestSavingToFile()
         {

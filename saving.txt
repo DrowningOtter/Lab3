@@ -1,0 +1,10 @@
+Initial grid: V2DataArray key 08.12.2023 0:00:00
+1,000 1,000 2,000
+2,000 4,000 4,000
+6,000 36,000 12,000
+9,000 81,000 18,000
+
+
+Minimal residual value: 8,140765504336012E-07
+Stop reason: 3
+Actual number of iterations: 33

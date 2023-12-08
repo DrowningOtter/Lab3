@@ -20,13 +20,11 @@ namespace Lab3
         }
         public string ToString(string format)
         {
-            return xCoord.ToString(format) + ", " +
-                yTrue.ToString(format) + ", " +
-                yPred.ToString(format);
+            return $"{xCoord.ToString(format)}, {yTrue.ToString(format)}, {yPred.ToString(format)}";
         }
         public override string ToString()
         {
-            return xCoord.ToString() + ", " + yTrue.ToString() + ", " + yPred.ToString();
+            return $"{xCoord.ToString()}, {yTrue.ToString()}, {yPred.ToString()}";
         }
     }
 }
