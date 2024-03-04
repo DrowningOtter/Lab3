@@ -27,7 +27,8 @@ struct SplineDesignInformation
 void SplineOnUnevenMesh(MKL_INT* nX, MKL_INT* m, double* valuesOnUniformGrid, double* f, void* userData)
 {
     // void * - единственный допустимый вариант передачи остальных параметов
-    SplineDesignInformation params = *((SplineDesignInformation*)userData);
+    //SplineDesignInformation params = *((SplineDesignInformation*)userData);
+    SplineDesignInformation params = *(static_cast<SplineDesignInformation*>(userData));
     int status = -1;
     DFTaskPtr task;
 
