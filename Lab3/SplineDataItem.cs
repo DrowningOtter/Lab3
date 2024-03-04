@@ -8,23 +8,23 @@ namespace Lab3
 {
     public class SplineDataItem
     {
-        public double xCoord {  get; set; }
-        public double yTrue { get; set; }
-        public double yPred { get; set; }
+        public double netValue { get; set; }
+        public double exactValue { get; set; }
+        public double calculatedValue { get; set; }
 
-        public SplineDataItem(double xCoord, double yTrue, double yPred)
+        public SplineDataItem(double netValue, double exactValue, double calculatedValue)
         {
-            this.xCoord = xCoord;
-            this.yTrue = yTrue;
-            this.yPred = yPred;
+            this.netValue = netValue;
+            this.exactValue = exactValue;
+            this.calculatedValue = calculatedValue;
         }
         public string ToString(string format)
         {
-            return $"{xCoord.ToString(format)}, {yTrue.ToString(format)}, {yPred.ToString(format)}";
+            return $"{netValue.ToString(format)}, {exactValue.ToString(format)}, {calculatedValue.ToString(format)}";
         }
         public override string ToString()
         {
-            return $"{xCoord.ToString()}, {yTrue.ToString()}, {yPred.ToString()}";
+            return $"{netValue.ToString()}, {exactValue.ToString()}, {calculatedValue.ToString()}";
         }
     }
 }

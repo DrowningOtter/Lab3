@@ -1,0 +1,163 @@
+﻿<Window x:Class="WpfApp1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp1"
+        xmlns:sharp="clr-namespace:Lab3;assembly=Lab3"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="700" Width="1000"
+        WindowStartupLocation="Manual"
+        Left="0" Top="0">
+    <Window.Resources>
+        <local:BorderConverter x:Key="BorderConverter"/>
+
+        <DataTemplate x:Key="func_name">
+            <TextBlock Text="{Binding Method.Name}"/>
+        </DataTemplate>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="10,0,10,0"/>
+            <Setter Property="Padding" Value="0,3,0,3"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="10,0,10,0"/>
+            <Setter Property="Padding" Value="0,3,0,3"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="3,7,3,7"/>
+        </Style>
+        <Style TargetType="RadioButton">
+            <Setter Property="Margin" Value="10,0,10,0"/>
+        </Style>
+        <Style TargetType="ListBox">
+            <Setter Property="Margin" Value="10,0,10,0"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Margin" Value="5,5,5,5"/>
+            <Setter Property="Height" Value="auto"/>
+        </Style>
+        <DataTemplate x:Key="spline_simple_net_template" DataType="{x:Type sharp:SplineDataItem}">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="x = "/>
+                <TextBlock Text="{Binding netValue, StringFormat=F2}" HorizontalAlignment="Left"/>
+                <TextBlock Text=", exact = "/>
+                <TextBlock Text="{Binding exactValue, StringFormat=F2}" HorizontalAlignment="Left"/>
+                <TextBlock Text=", calculated = "/>
+                <TextBlock Text="{Binding calculatedValue, StringFormat=F2}" HorizontalAlignment="Left"/>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="spline_smaller_net_template" DataType="{x:Type sharp:DataItemS}">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="x = "/>
+                <TextBlock Text="{Binding NodeCoord, StringFormat=F2}"/>
+                <TextBlock Text=", spline value = "/>
+                <TextBlock Text="{Binding SplineValue, StringFormat=F2}"/>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.5*"/>
+            <ColumnDefinition Width="1.5*"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Menu Background="DarkGray" Grid.ColumnSpan="4">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Save" Click="SaveDataToFileClick"/>
+            </MenuItem>
+            <MenuItem Header="_Execute">
+                <MenuItem Header="Data from Controls" Click="LoadDataFromControlsClick"/>
+                <MenuItem Header="Data from File" Click="LoadDataFromFileClick"/>
+            </MenuItem>
+        </Menu>
+
+        <Label Grid.Row="1" Content="Ввод параметров для DataArray:"/>
+        <TextBlock Grid.Column="0" Grid.Row="2" Text='Введите границы отрезка(разделитель - ";")' TextWrapping="Wrap" Margin="10,0,10,0" Padding="0,3,0,3"/>
+        <TextBox Grid.Column="0" Grid.Row="3" Height="23" x:Name="netBoundaries" Margin="10,0,10,0">
+            <MultiBinding Converter="{StaticResource BorderConverter}">
+                <Binding Path="left_border" ValidatesOnDataErrors="true" UpdateSourceTrigger="PropertyChanged"/>
+                <Binding Path="right_border" ValidatesOnDataErrors="true" UpdateSourceTrigger="PropertyChanged"/>
+            </MultiBinding>
+        </TextBox>
+
+        <TextBlock Grid.Column="0" Grid.Row="4" Text="Введите количество вершин" 
+                   TextWrapping="Wrap" Margin="10,0,10,0" Padding="0,3,0,3" VerticalAlignment="Bottom"/>
+        <TextBox Grid.Column="0" Grid.Row="5" Height="23" x:Name="nodeAmount" 
+                 Margin="10,0,10,0" Text="{Binding arrayNodesAmount, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Grid.Column="0" Grid.Row="6" Text="Выберите тип сетки" TextWrapping="Wrap" 
+                   Margin="10,0,10,0" Padding="0,3,0,3" VerticalAlignment="Bottom"/>
+        <Grid Grid.Row="7">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="5*"/>
+                <ColumnDefinition Width="5*"/>
+            </Grid.ColumnDefinitions>
+            <RadioButton Grid.Column="0" Content="Uniform" IsChecked="{Binding isUniform}" VerticalAlignment="Center"/>
+            <RadioButton Grid.Column="1"  Content="Non uniform" IsChecked="{Binding isNonUniform}" VerticalAlignment="Center"/>
+        </Grid>
+
+        <TextBlock Grid.Column="0" Grid.Row="8" Text="Выберите функцию вычисления значений поля" 
+                   TextWrapping="Wrap" Margin="10,0,10,0" Padding="0,3,0,3" VerticalAlignment="Bottom"/>
+        <ComboBox Grid.Column="0" Grid.Row="9" Margin="10,0,10,0" ItemsSource="{Binding listFValues}" 
+                  SelectedItem="{Binding fValues}" ItemTemplate="{StaticResource func_name}"/>
+
+        <!--Заполнение данных для сплайна-->
+        <Label Grid.Row="1" Grid.Column="1" Content="Ввод параметров для SplineData"/>
+        <TextBlock Grid.Column="1" Grid.Row="2" Text="Введите число узлов сглаживающего сплайна" TextWrapping="Wrap" Margin="10,0,10,0" Padding="0,3,0,3"/>
+        <TextBox Grid.Column="1" Grid.Row="3" Height="23" x:Name="splineNodesAmount" Text="{Binding splineNodesAmount, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Grid.Column="1" Grid.Row="4" Text="Введите число узлов равномерной сетки для сплайна" TextWrapping="Wrap"/>
+        <TextBox Grid.Column="1" Grid.Row="5" Height="23" x:Name="uniformGridNodesAmount" Text="{Binding splineCalculationNodesAmount, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Grid.Column="1" Grid.Row="6" Text="Введите значение нормы невязки для остановки итераций" TextWrapping="Wrap"/>
+        <TextBox Grid.Column="1" Grid.Row="7" Height="23" x:Name="residualNormToStop" Text="{Binding normResidual, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Grid.Column="1" Grid.Row="8" Text="Введите максимальное число итераций при минимизации невязки" TextWrapping="Wrap"/>
+        <TextBox Grid.Column="1" Grid.Row="9" Height="23" x:Name="maxIterationsNum" Text="{Binding maxIterations, UpdateSourceTrigger=PropertyChanged}"/>
+
+
+        <Grid Grid.Column="2" Grid.Row="1" Grid.RowSpan="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="4*"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="4*"/>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Column="3" Grid.Row="0" Text="Вывод входных данных и результатов вычислений" TextWrapping="Wrap"/>
+            <TextBlock Grid.Row="1" Text="Значения сплайна на сетке массива" TextWrapping="Wrap"/>
+            <ListBox Grid.Row="2" x:Name="SplineOnNet" MaxHeight="250" ItemTemplate="{StaticResource spline_simple_net_template}"/>
+            <TextBlock Grid.Row="3" Text="Значения сплайна на более мелкой сетке" TextWrapping="Wrap"/>
+            <ListBox Grid.Row="4" x:Name="SplineOnSmallerNet" MaxHeight="250" ItemTemplate="{StaticResource spline_smaller_net_template}"/>
+
+            <Grid Grid.Row="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="_Save" Click="SaveDataToFileClick"/>
+                <Button Grid.Column="1" Content="Data from Controls" Click="LoadDataFromControlsClick"/>
+                <Button Grid.Column="2" Content="Data from File" Click="LoadDataFromFileClick"/>
+            </Grid>
+        </Grid>
+
+    </Grid>
+
+</Window>

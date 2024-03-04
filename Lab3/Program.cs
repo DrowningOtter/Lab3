@@ -26,28 +26,34 @@ namespace Lab3
             new Func<double, double>(x => 3 * x * x * x),
             new Func<double, double>(x => 2.5 * x + 5),
         };
-        private static void Main()
-        {
-            Random rn = new Random();
-            int minValue = 0;
-            int maxValue = 10;
-            int len = 4;
-            double[] x = Enumerable.Range(minValue, maxValue - minValue + 1).Select(x => (double)x).OrderBy(_ => rn.Next()).Take(len).ToArray();
-            Array.Sort(x);
-            x = x.Distinct().ToArray();
+        public static double FUNC1(double x) => 17*x + 6;
+        public static double FUNC2(double x) => 2 * x * x * x + 3 * x * x + 6;
+        //private static void Main()
+        //{
+        //    Random rn = new Random();
+        //    int minValue = 0;
+        //    int maxValue = 10;
+        //    int len = 4;
+        //    //double[] x = Enumerable.Range(minValue, maxValue - minValue + 1).Select(x => (double)x).OrderBy(_ => rn.Next()).Take(len).ToArray();
+        //    double[] x = { 1, 4, 8, 9 };
+        //    Array.Sort(x);
+        //    x = x.Distinct().ToArray();
 
-            V2DataArray arr = new V2DataArray("key", DateTime.Today, x, func1);
-            int number_of_dots_in_uniform_grid = 4;
-            for (int i = 0; i < approximation_funcs.Length; ++i)
-            {
-                Console.WriteLine($"testing initial approximation function with number {i}");
-                Func<double, double> func = approximation_funcs[i];
-                SplineData data = new SplineData(arr, number_of_dots_in_uniform_grid, 1000);
-                SplineData.CalcSpline(data, func);
-                Console.WriteLine(data.ToLongString("f3"));
-                data.Save($"C:\\Users\\Artem\\source\\repos\\Lab3\\saving{i}.txt", "f3");
-            }
-        }
+        //    V2DataArray arr = new V2DataArray("key", DateTime.Today, x, func1);
+        //    int number_of_dots_in_uniform_grid = 4;
+        //    Console.WriteLine($"testing initial approximation function with number 0");
+        //    SplineData data = new SplineData(arr, number_of_dots_in_uniform_grid, 1000);
+        //    SplineData.CalcSpline(data, FUNC1);
+        //    Console.WriteLine(data.ToLongString("f3"));
+        //    data.Save($"C:\\Users\\Artem\\source\\repos\\Lab3\\saving0.txt", "f3");
+
+        //    V2DataArray arr2 = new V2DataArray("key", DateTime.Today, x, func1);
+        //    Console.WriteLine($"testing initial approximation function with number 1");
+        //    SplineData data2 = new SplineData(arr, number_of_dots_in_uniform_grid, 1000);
+        //    SplineData.CalcSpline(data, FUNC2);
+        //    Console.WriteLine(data.ToLongString("f3"));
+        //    data.Save($"C:\\Users\\Artem\\source\\repos\\Lab3\\saving1.txt", "f3");
+        //}
         private static void TestSavingToFile()
         {
             var x = new double[] { 4, 5, 9, 7, 23 };

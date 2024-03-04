@@ -144,7 +144,7 @@ namespace Lab3
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return false;
+                throw;
             }
             return true;
         }
