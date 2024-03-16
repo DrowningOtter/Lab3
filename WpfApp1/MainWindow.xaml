@@ -3,12 +3,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WpfApp1"
         xmlns:sharp="clr-namespace:Lab3;assembly=Lab3"
+        xmlns:local="clr-namespace:WpfApp1"
+        xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
         Title="MainWindow" Height="700" Width="1000"
         WindowStartupLocation="Manual"
         Left="0" Top="0">
+    <Window.CommandBindings>
+        <CommandBinding Command="{x:Static local:MyCommands.CheckControlsCommand}"
+                        CanExecute="CheckControls" Executed="CalculateAndShowResult"/>
+        <CommandBinding Command="ApplicationCommands.Save" CanExecute="CheckBeforeSave" Executed="SaveDataToFile"/>
+    </Window.CommandBindings>
+
     <Window.Resources>
         <local:BorderConverter x:Key="BorderConverter"/>
 
@@ -78,14 +85,15 @@
 
         <Menu Background="DarkGray" Grid.ColumnSpan="4">
             <MenuItem Header="_File">
-                <MenuItem Header="_Save" Click="SaveDataToFileClick"/>
+                <MenuItem Header="_Save" Command="ApplicationCommands.Save"/>
             </MenuItem>
             <MenuItem Header="_Execute">
-                <MenuItem Header="Data from Controls" Click="LoadDataFromControlsClick"/>
+                <MenuItem Header="Data from Controls" Command="{x:Static local:MyCommands.CheckControlsCommand}"/>
                 <MenuItem Header="Data from File" Click="LoadDataFromFileClick"/>
             </MenuItem>
         </Menu>
 
+        <!--Заполнение параметров для массива-->
         <Label Grid.Row="1" Content="Ввод параметров для DataArray:"/>
         <TextBlock Grid.Column="0" Grid.Row="2" Text='Введите границы отрезка(разделитель - ";")' TextWrapping="Wrap" Margin="10,0,10,0" Padding="0,3,0,3"/>
         <TextBox Grid.Column="0" Grid.Row="3" Height="23" x:Name="netBoundaries" Margin="10,0,10,0">
@@ -98,7 +106,7 @@
         <TextBlock Grid.Column="0" Grid.Row="4" Text="Введите количество вершин" 
                    TextWrapping="Wrap" Margin="10,0,10,0" Padding="0,3,0,3" VerticalAlignment="Bottom"/>
         <TextBox Grid.Column="0" Grid.Row="5" Height="23" x:Name="nodeAmount" 
-                 Margin="10,0,10,0" Text="{Binding arrayNodesAmount, UpdateSourceTrigger=PropertyChanged}"/>
+                 Margin="10,0,10,0" Text="{Binding arrayNodesAmount, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"/>
 
         <TextBlock Grid.Column="0" Grid.Row="6" Text="Выберите тип сетки" TextWrapping="Wrap" 
                    Margin="10,0,10,0" Padding="0,3,0,3" VerticalAlignment="Bottom"/>
@@ -107,7 +115,7 @@
                 <ColumnDefinition Width="5*"/>
                 <ColumnDefinition Width="5*"/>
             </Grid.ColumnDefinitions>
-            <RadioButton Grid.Column="0" Content="Uniform" IsChecked="{Binding isUniform}" VerticalAlignment="Center"/>
+            <RadioButton Grid.Column="0" Content="Uniform" IsChecked="{Binding isUniform, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
             <RadioButton Grid.Column="1"  Content="Non uniform" IsChecked="{Binding isNonUniform}" VerticalAlignment="Center"/>
         </Grid>
 
@@ -119,13 +127,13 @@
         <!--Заполнение данных для сплайна-->
         <Label Grid.Row="1" Grid.Column="1" Content="Ввод параметров для SplineData"/>
         <TextBlock Grid.Column="1" Grid.Row="2" Text="Введите число узлов сглаживающего сплайна" TextWrapping="Wrap" Margin="10,0,10,0" Padding="0,3,0,3"/>
-        <TextBox Grid.Column="1" Grid.Row="3" Height="23" x:Name="splineNodesAmount" Text="{Binding splineNodesAmount, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBox Grid.Column="1" Grid.Row="3" Height="23" x:Name="splineNodesAmount" Text="{Binding splineNodesAmount, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
 
         <TextBlock Grid.Column="1" Grid.Row="4" Text="Введите число узлов равномерной сетки для сплайна" TextWrapping="Wrap"/>
-        <TextBox Grid.Column="1" Grid.Row="5" Height="23" x:Name="uniformGridNodesAmount" Text="{Binding splineCalculationNodesAmount, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBox Grid.Column="1" Grid.Row="5" Height="23" x:Name="uniformGridNodesAmount" Text="{Binding splineCalculationNodesAmount, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
 
         <TextBlock Grid.Column="1" Grid.Row="6" Text="Введите значение нормы невязки для остановки итераций" TextWrapping="Wrap"/>
-        <TextBox Grid.Column="1" Grid.Row="7" Height="23" x:Name="residualNormToStop" Text="{Binding normResidual, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBox Grid.Column="1" Grid.Row="7" Height="23" x:Name="residualNormToStop" Text="{Binding normResidual}"/>
 
         <TextBlock Grid.Column="1" Grid.Row="8" Text="Введите максимальное число итераций при минимизации невязки" TextWrapping="Wrap"/>
         <TextBox Grid.Column="1" Grid.Row="9" Height="23" x:Name="maxIterationsNum" Text="{Binding maxIterations, UpdateSourceTrigger=PropertyChanged}"/>
@@ -152,11 +160,15 @@
                     <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Content="_Save" Click="SaveDataToFileClick"/>
-                <Button Grid.Column="1" Content="Data from Controls" Click="LoadDataFromControlsClick"/>
+                <Button Grid.Column="0" Content="Save" Command="ApplicationCommands.Save"/>
+                <Button Grid.Column="1" Content="Data from Controls" Command="{x:Static local:MyCommands.CheckControlsCommand}"/>
                 <Button Grid.Column="2" Content="Data from File" Click="LoadDataFromFileClick"/>
             </Grid>
         </Grid>
+        <!--<TextBlock HorizontalAlignment="Left" Margin="115,127,0,0" Grid.Row="10" TextWrapping="Wrap" Text="{Binding actualNumberOfIterations, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Height="29" Width="83"/>-->
+        <oxy:PlotView HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Model="{Binding plotModel.plotModel}"
+                        Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="10" Margin="20, 20, 20, 20">
+        </oxy:PlotView>
 
     </Grid>
 

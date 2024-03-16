@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using Lab3;
+using OxyPlot;
 
 namespace WpfApp1
 {
@@ -35,17 +36,19 @@ namespace WpfApp1
                 return new object[] { double.Parse(strs[0]), double.Parse(strs[1]) };
             }
             catch {
-                ViewData.PrintError(nameof(ConvertBack));
+                //ViewData.PrintError(nameof(ConvertBack));
+                // TODO  в этом месте проверяем корректность
                 //return new object[2];
                 return new object[] { (double)0, (double)5 };
             }
         }
     }
 
-    public class ViewData : INotifyPropertyChanged
+    public class ViewData : INotifyPropertyChanged, IDataErrorInfo
     {
         public V2DataArray dataArray { get; set; }
         public SplineData splineData { get; set; }
+        public MyPlot plotModel { get; set; }
 
         // Ввод параметров для DataArray
         public double _left_border;
@@ -92,7 +95,19 @@ namespace WpfApp1
         public int splineCalculationNodesAmount { get; set; }
         public double normResidual { get; set; }
         public int maxIterations { get; set; }
-
+        public int _actualNumberOfIterations;
+        public int actualNumberOfIterations
+        {
+            get { return _actualNumberOfIterations; }
+            set
+            {
+                if (_actualNumberOfIterations != value)
+                {
+                    _actualNumberOfIterations = value;
+                    OnPropertyChanged(nameof(actualNumberOfIterations));
+                }
+            }
+        }
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName)
         {
@@ -149,7 +164,8 @@ namespace WpfApp1
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                //MessageBox.Show(ex.Message);
+                throw;
             }
         }
         public void FillDataArray()
@@ -181,33 +197,41 @@ namespace WpfApp1
         {
             splineData = new SplineData(dataArray, splineNodesAmount, maxIterations, splineCalculationNodesAmount);
             SplineData.CalcSpline(splineData, (double x) => 2 * x + 3);
+            actualNumberOfIterations = splineData.ActualNumberOfIterations;
         }
 
-        public static void PrintError(string methodName)
+        public string Error { get { return "Incorrect data."; } }
+        public string this[string propertyName]
         {
-            if (methodName == nameof(BorderConverter.ConvertBack))
+            get
             {
-                MessageBox.Show("В качестве границ отрезка вы должны ввести два числа, разделенные ;");
-            }
-            else if (methodName == "nodeAmountInvalidValue")
-            {
-                MessageBox.Show("Количество вершин массива должно быть целым положительным числом");
-            }
-            else if (methodName == "splineNodesAmountInvalidValue")
-            {
-                MessageBox.Show("Количество вершин сплайна должно быть целым положительным числом, меньшим количества вершин массива");
-            }
-            else if (methodName == "uniformGridNodesAmountInvalidValue")
-            {
-                MessageBox.Show("Количество узлов равномерной сетки для сплайна должно быть целым положительным числом");
-            }
-            else if (methodName == "residualNormToStopInvalidValue")
-            {
-                MessageBox.Show("Значение нормы невязки должно быть вещественным положительным числом");
-            }
-            else if (methodName == "maxIterationsNumInvalidValue")
-            {
-                MessageBox.Show("Максимальное количество итераций должно быть целым положительным числом");
+                string? error = null;
+                switch(propertyName)
+                {
+                    case "arrayNodesAmount":
+                        if (arrayNodesAmount < 3)
+                            error = "Число узлов сетки, на которой заданы дискретные значения функции, должно быть больше или равно 3";
+                        break;
+                    case "splineCalculationNodesAmount":
+                        if (splineCalculationNodesAmount < 3)
+                            error = "Число узлов равномерной сетки, на которой вычисляются значения сглаживающего сплайна, должно быть больше или равно 3";
+                        break;
+                    case "left_border":
+                        if (left_border >= right_border)
+                            error = "Левый конец отрезка должен быть меньше правого конца отрезка";
+                        break;
+                    case "right_border":
+                        if (left_border >= right_border)
+                            error = "Левый конец отрезка должен быть меньше правого конца отрезка";
+                        break;
+                    case "splineNodesAmount":
+                        if (splineNodesAmount < 2 || splineNodesAmount > arrayNodesAmount)
+                            error = "Число узлов сглаживающего сплайна должно быть больше или равно 2 и меньше или равно числу заданных дискретных значений функции";
+                        break;
+                    default:
+                        break;
+                }
+                return error;
             }
         }
 
@@ -218,7 +242,7 @@ namespace WpfApp1
         }
         public void cubic(double x, ref double y1, ref double y2)
         {
-            y1 = 2 * x * x * x + 3;
+            y1 = x * x * x;
             y2 = x * x * x;
         }
         public void random(double x, ref double y1, ref double y2)

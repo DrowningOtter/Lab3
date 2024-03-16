@@ -1,4 +1,6 @@
 ﻿using Lab3;
+using OxyPlot;
+using OxyPlot.Series;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,44 +18,15 @@ using System.Windows.Shapes;
 
 namespace WpfApp1
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        ViewData viewData { get; set; }
+        ViewData viewData = new ViewData();
         public MainWindow()
         {
             InitializeComponent();
-            viewData = new ViewData();
             this.DataContext = viewData;
         }
 
-        private void SaveDataToFileClick(object sender, RoutedEventArgs e)
-        {
-            if (viewData.dataArray == null)
-            {
-                MessageBox.Show("DataArray haven't been filled. First, fill data.");
-                return;
-            }
-            if (!ValidateFields()) return;
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            bool? result = dlg.ShowDialog();
-            if (result == true)
-            {
-                string filename = dlg.FileName;
-                //MessageBox.Show("\"" + filename + "\" filename selected.");
-                try
-                {
-                    viewData.Save(filename);
-                    MessageBox.Show("Your data saved as \"" + filename + "\"");
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
-            }
-        }
         private void LoadDataFromFileClick(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
@@ -65,7 +38,7 @@ namespace WpfApp1
                 {
                     viewData.Load(filename);
                     MessageBox.Show("Data was loaded from \"" + filename + "\"");
-                    if (!ValidateFields()) return;
+                    //if (!ValidateFields()) return;
                     viewData.CalculateSpline();
                     SplineOnNet.ItemsSource = viewData.splineData.calculatedSpline;
                     SplineOnSmallerNet.ItemsSource = viewData.splineData.SmallNetSplineValues;
@@ -76,51 +49,74 @@ namespace WpfApp1
                 }
             }
         }
-        private void LoadDataFromControlsClick(object sender, RoutedEventArgs e)
+
+        public void CheckControls(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (!ValidateFields()) return;
+            try
+            {
+                bool canExecute = true;
+                string? error = null;
+                string[] fields = { "arrayNodesAmount", "splineCalculationNodesAmount", "left_border", "splineNodesAmount" };
+                foreach (var field in fields)
+                {
+                    error = viewData[field];
+                    canExecute = error == null && canExecute;
+                    if (error != null)
+                    {
+                        //Console.WriteLine(error);
+                    }
+                }
+                e.CanExecute = canExecute;
+                //if(error != null)
+                //{
+                //    MessageBox.Show(error);
+                //    error = null;
+                //}
+            }
+            catch (Exception ex)
+            {
+                e.CanExecute = false;
+            }
+        }
+        private void CalculateAndShowResult(object sender, ExecutedRoutedEventArgs e)
+        {
             viewData.FillDataArray();
             viewData.CalculateSpline();
-            //MessageBox.Show("Вычисления завершены");
             SplineOnNet.ItemsSource = viewData.splineData.calculatedSpline;
             SplineOnSmallerNet.ItemsSource = viewData.splineData.SmallNetSplineValues;
+            viewData.plotModel = new MyPlot(viewData.splineData);
+            this.DataContext = null;
+            this.DataContext = viewData;
         }
-
-        private bool ValidateFields()
+        private void CheckBeforeSave(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (!int.TryParse(nodeAmount.Text, out int nodeAmountInt) || nodeAmountInt <= 0)
+            try
             {
-                ViewData.PrintError("nodeAmountInvalidValue");
-                nodeAmount.Text = "10";
-                return false;
+                if (viewData.dataArray == null) e.CanExecute = false;
+                else { e.CanExecute = true;  }
             }
-            else if (!int.TryParse(splineNodesAmount.Text, out int splineNodesAmountInt) || 
-                splineNodesAmountInt <= 0 || splineNodesAmountInt >= nodeAmountInt)
+            catch (Exception ex)
             {
-                ViewData.PrintError("splineNodesAmountInvalidValue");
-                splineNodesAmount.Text = "5";
-                return false;
+                e.CanExecute = false;
             }
-            else if (!int.TryParse(uniformGridNodesAmount.Text, out int uniformGridNodesAmountInt) || 
-                uniformGridNodesAmountInt <= 0)
+        }
+        private void SaveDataToFile(object sender, ExecutedRoutedEventArgs e)
+        {
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            bool? result = dlg.ShowDialog();
+            if (result == true)
             {
-                ViewData.PrintError("uniformGridNodesAmountInvalidValue");
-                uniformGridNodesAmount.Text = "10";
-                return false;
+                string filename = dlg.FileName;
+                try
+                {
+                    viewData.Save(filename);
+                    MessageBox.Show("Your data saved as \"" + filename + "\"");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
             }
-            else if (!double.TryParse(residualNormToStop.Text, out double residualNormToStopDouble) || residualNormToStopDouble <= 0)
-            {
-                ViewData.PrintError("residualNormToStopInvalidValue");
-                residualNormToStop.Text = "1E-06";
-                return false;
-            }
-            else if (!int.TryParse(maxIterationsNum.Text, out int maxIterationsNumInt) || maxIterationsNumInt <= 0)
-            {
-                ViewData.PrintError("maxIterationsNumInvalidValue");
-                maxIterationsNum.Text = "1000";
-                return false;
-            }
-            return true;
         }
     }
 }
